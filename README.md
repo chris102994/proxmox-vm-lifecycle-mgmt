@@ -2,6 +2,16 @@
 
 This is a collection of scripts and configuration files to build a Proxmox VM image using Packer, deploy it to Proxmox with Terraform and configure it with Ansible.
 
+
+## Usage
+
+Follow the output for the help command to get started.
+
+```shell
+./build.sh help
+```
+
+
 ## Technologies used
 * [Ansible](https://github.com/ansible/ansible)
 * [Packer](https://github.com/hashicorp/packer)

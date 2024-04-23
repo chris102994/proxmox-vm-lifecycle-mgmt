@@ -15,10 +15,13 @@ includes:
     taskfile: ./ansible/Taskfile.yaml
 tasks:
   default:
+    desc: "This is the default task. It simply runs the help task."
     cmd: task --list-all
   alias:
     - help
   generate-ssh-key:
+    desc: "Generate an SSH key pair for use with the builds."
+    silent: true
     requires:
       vars:
         - SSH_PRIVATE_KEY
@@ -39,4 +42,3 @@ tasks:
         chmod 600 "{{.SSH_PRIVATE_KEY}}"
         chmod 644 "{{.SSH_PUBLIC_KEY}}"
         echo "SSH key pair generated in {{.SSH_KEY_DIR}}"
-    silent: true
