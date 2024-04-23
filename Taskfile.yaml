@@ -19,7 +19,7 @@ tasks:
     cmd: task --list-all
   alias:
     - help
-  generate-ssh-key:
+  ssh:generate:
     desc: "Generate an SSH key pair for use with the builds."
     silent: true
     requires:
