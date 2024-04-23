@@ -1,0 +1,11 @@
+---
+- name: "Add New Packages"
+  community.general.rpm_ostree_pkg:
+    name:
+      - parted
+    state: present
+
+- name: "Reboot"
+  reboot:
+    reboot_timeout: 300
+    msg: "Rebooting to apply changes"

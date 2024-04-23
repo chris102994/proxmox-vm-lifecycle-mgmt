@@ -1,0 +1,5 @@
+---
+- name: "{{ role_name }}"
+  include_tasks: "CoreOS.yml"
+  when: (ansible_distribution == "Fedora") and
+        (ansible_pkg_mgr == "atomic_container")

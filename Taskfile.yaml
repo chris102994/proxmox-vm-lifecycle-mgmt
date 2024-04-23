@@ -1,0 +1,42 @@
+version: '3'
+
+env:
+  STATE_DIR: "{{.USER_WORKING_DIR}}/state"
+  ANSIBLE_DIR: "{{.USER_WORKING_DIR}}/ansible"
+  SSH_KEY_DIR: "{{.STATE_DIR}}/ssh"
+  SSH_PRIVATE_KEY: "{{.SSH_KEY_DIR}}/id_rsa"
+  SSH_PUBLIC_KEY: "{{.SSH_PRIVATE_KEY}}.pub"
+
+includes:
+  images:
+    taskfile: ./template-images/Taskfile.yaml
+  ansible:
+    internal: true # This will be true until the pathlib bug is fixed for ansible-lint
+    taskfile: ./ansible/Taskfile.yaml
+tasks:
+  default:
+    cmd: task --list-all
+  alias:
+    - help
+  generate-ssh-key:
+    requires:
+      vars:
+        - SSH_PRIVATE_KEY
+        - SSH_PUBLIC_KEY
+        - SSH_KEY_DIR
+    generates:
+      - "{{.SSH_PRIVATE_KEY}}"
+      - "{{.SSH_PUBLIC_KEY}}"
+      - "{{.SSH_KEY_DIR}}"
+    preconditions:
+      - "! test -f {{.SSH_PRIVATE_KEY}}"
+      - "! test -f {{.SSH_PUBLIC_KEY}}"
+    cmds:
+      - |
+        mkdir -p "{{.SSH_KEY_DIR}}"
+        chmod 700 "{{.SSH_KEY_DIR}}"
+        ssh-keygen -t rsa -b 4096 -f "{{.SSH_PRIVATE_KEY}}" -N ""
+        chmod 600 "{{.SSH_PRIVATE_KEY}}"
+        chmod 644 "{{.SSH_PUBLIC_KEY}}"
+        echo "SSH key pair generated in {{.SSH_KEY_DIR}}"
+    silent: true

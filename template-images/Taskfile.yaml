@@ -1,0 +1,5 @@
+version: '3'
+
+includes:
+  coreos:
+    taskfile: ./coreos/Taskfile.yaml
