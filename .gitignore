@@ -2,3 +2,5 @@
 .task/
 state/*
 !state/.gitkeep
+tfmodules/proxmox-vm/.terraform
+tfmodules/proxmox-vm/.terraform.lock.hcl

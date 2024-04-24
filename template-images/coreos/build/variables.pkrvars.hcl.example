@@ -1,0 +1,20 @@
+/*
+  This will go in state/coreos/variables.pkrvars.hcl
+*/
+
+proxmox_node = "<node name>"
+proxmox_username = "<name>@pve!<TokenName>"
+proxmox_token = "<token>"
+proxmox_api_url = "https://<ip>:<port>/api2/json"
+
+iso_file = "local:iso/fedora-coreos-39.20240322.3.1-live.x86_64.iso"
+template_name = "coreos-39.20240322.3.1"
+
+hostname = "coreos-template"
+interface = "ens18"
+ip_address = "<ip>"
+netmask = "<netmask>"
+gateway = "<gateway>"
+dns = ["<dns>"]
+default_user = "core"
+default_password = "<password>"

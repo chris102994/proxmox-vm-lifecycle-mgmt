@@ -50,7 +50,8 @@ tasks:
         - SSH_PRIVATE_KEY
         - SSH_PUBLIC_KEY
     preconditions:
-      - "test -f {{.PACKER_VARS_FILE}}"
+      - sh: "test -f {{.PACKER_VARS_FILE}}"
+        msg: "Packer Vars File {{.PACKER_VARS_FILE}} doesn't exist."
     sources:
       - "{{.TEMPLATE_CONFIG_DIR}}/installer.bu.pkrtpl.hcl"
       - "{{.TASKFILE_DIR}}/build/IgnitionBuilder.pkr.hcl"
@@ -79,7 +80,8 @@ tasks:
     deps:
       - init-state-dir
     preconditions:
-      - "test -f {{.PACKER_VARS_FILE}}"
+      - sh: "test -f {{.PACKER_VARS_FILE}}"
+        msg: "Packer Vars File {{.PACKER_VARS_FILE}} doesn't exist."
     requires:
       vars:
         - PACKER_VARS_FILE
@@ -99,7 +101,7 @@ tasks:
       - task: generate-ignition-config
       - |
           packer build \
-            --on-error=cleanup \
+            --on-error=ask \
             -except="*IgnitionBuilder*" \
             -var-file={{.PACKER_VARS_FILE}} \
             -var "tpl_config_dir={{.TEMPLATE_CONFIG_DIR}}" \

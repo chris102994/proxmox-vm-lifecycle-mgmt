@@ -17,8 +17,8 @@ tasks:
   default:
     desc: "This is the default task. It simply runs the help task."
     cmd: task --list-all
-  alias:
-    - help
+    aliases:
+      - help
   ssh:generate:
     desc: "Generate an SSH key pair for use with the builds."
     silent: true
@@ -32,8 +32,10 @@ tasks:
       - "{{.SSH_PUBLIC_KEY}}"
       - "{{.SSH_KEY_DIR}}"
     preconditions:
-      - "! test -f {{.SSH_PRIVATE_KEY}}"
-      - "! test -f {{.SSH_PUBLIC_KEY}}"
+      - sh: "! test -f {{.SSH_PRIVATE_KEY}}"
+        msg: "SSH private key already exists."
+      - sh: "! test -f {{.SSH_PUBLIC_KEY}}"
+        msg: "SSH public key already exists."
     cmds:
       - |
         mkdir -p "{{.SSH_KEY_DIR}}"
@@ -42,3 +44,33 @@ tasks:
         chmod 600 "{{.SSH_PRIVATE_KEY}}"
         chmod 644 "{{.SSH_PUBLIC_KEY}}"
         echo "SSH key pair generated in {{.SSH_KEY_DIR}}"
+  terraform:deploy:coreos:
+    desc: "Deploy a CoreOS instance using Terraform."
+    requires:
+      vars:
+        - SSH_PUBLIC_KEY
+        - SSH_PRIVATE_KEY
+        - STATE_DIR
+        - ANSIBLE_DIR
+    cmds:
+      - "mkdir -p {{.STATE_DIR}}/coreos/terraform"
+      - "terraform -chdir={{.USER_WORKING_DIR}}/tfmodules/proxmox-vm/ init -upgrade -lock=false"
+      - |
+        terraform \
+          -chdir={{.USER_WORKING_DIR}}/tfmodules/proxmox-vm/ \
+        plan \
+          -state={{.STATE_DIR}}/coreos/terraform/terraform.tfstate \
+          -var-file={{.STATE_DIR}}/coreos/variables.pkrvars.hcl \
+          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          -var "ansible_dir={{.ANSIBLE_DIR}}"
+      - |
+        terraform \
+          -chdir={{.USER_WORKING_DIR}}/tfmodules/proxmox-vm/ \
+        apply \
+          -auto-approve \
+          -state={{.STATE_DIR}}/coreos/terraform/terraform.tfstate \
+          -var-file={{.STATE_DIR}}/coreos/variables.pkrvars.hcl \
+          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          -var "ansible_dir={{.ANSIBLE_DIR}}"
