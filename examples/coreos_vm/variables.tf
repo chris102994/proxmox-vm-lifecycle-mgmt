@@ -1,3 +1,20 @@
+variable "proxmox_username" {
+  type = string
+  description = "The username to authenticate with"
+}
+
+variable "proxmox_token" {
+  type = string
+  description = "The token to authenticate with"
+}
+
+variable "proxmox_api_url" {
+  type = string
+  description = "The URL of the Proxmox API"
+}
+
+#####
+
 variable "ansible_dir" {
   type = string
   description = "The path to the directory where the ansible assets are"

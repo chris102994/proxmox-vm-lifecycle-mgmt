@@ -1,0 +1,92 @@
+version: '3'
+
+vars:
+  TASK_STATE_DIR: "{{.STATE_DIR}}/coreos/examples/coreos_vm/terraform"
+  TF_VARS_FILE: "{{.STATE_DIR}}/coreos/variables.pkrvars.hcl"
+
+tasks:
+  terraform:init:
+    internal: true
+    desc: "Initialize the Terraform CoreOS module."
+    requires:
+      vars:
+        - TASK_STATE_DIR
+    sources:
+      - "{{.TASKFILE_DIR}}/**/*"
+    cmds:
+      - "mkdir -p {{.TASK_STATE_DIR}}"
+      - |
+        terraform \
+          -chdir={{.TASKFILE_DIR}} \
+        init \
+          -upgrade \
+          -lock=false
+
+  terraform:deploy:
+    desc: "Deploy a CoreOS instance using Terraform."
+    requires:
+      vars:
+        - SSH_PUBLIC_KEY
+        - SSH_PRIVATE_KEY
+        - TASK_STATE_DIR
+        - ANSIBLE_DIR
+    deps:
+        - terraform:init
+    sources:
+      - "{{.TF_VARS_FILE}}"
+      - "{{.SSH_PRIVATE_KEY}}"
+      - "{{.SSH_PUBLIC_KEY}}"
+      - "{{.ANSIBLE_DIR}}/**/*"
+      - "{{.TASKFILE_DIR}}/**/*"
+    generates:
+      - "{{.TASK_STATE_DIR}}/terraform.tfstate"
+    cmds:
+      - |
+        terraform \
+          -chdir={{.TASKFILE_DIR}} \
+        plan \
+          -state={{.TASK_STATE_DIR}}/terraform.tfstate \
+          -var-file={{.TF_VARS_FILE}} \
+          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          -var "ansible_dir={{.ANSIBLE_DIR}}"
+      - |
+        terraform \
+          -chdir={{.TASKFILE_DIR}} \
+        apply \
+          -auto-approve \
+          -state={{.TASK_STATE_DIR}}/terraform.tfstate \
+          -var-file={{.TF_VARS_FILE}} \
+          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          -var "ansible_dir={{.ANSIBLE_DIR}}"
+
+  terraform:destroy:
+    desc: "Destroy a deployed CoreOS instance using Terraform."
+    requires:
+      vars:
+        - SSH_PUBLIC_KEY
+        - SSH_PRIVATE_KEY
+        - TASK_STATE_DIR
+        - ANSIBLE_DIR
+    deps:
+      - terraform:init
+    sources:
+      - "{{.TF_VARS_FILE}}"
+      - "{{.SSH_PRIVATE_KEY}}"
+      - "{{.SSH_PUBLIC_KEY}}"
+      - "{{.ANSIBLE_DIR}}/**/*"
+      - "{{.TASKFILE_DIR}}/**/*"
+    generates:
+      - "{{.TASK_STATE_DIR}}/terraform.tfstate"
+    cmds:
+      - |
+        terraform \
+          -chdir={{.TASKFILE_DIR}} \
+        destroy \
+          -auto-approve \
+          -state={{.TASK_STATE_DIR}}/terraform.tfstate \
+          -var-file={{.TF_VARS_FILE}} \
+          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          -var "ansible_dir={{.ANSIBLE_DIR}}"

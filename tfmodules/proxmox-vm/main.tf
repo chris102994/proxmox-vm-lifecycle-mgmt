@@ -7,15 +7,6 @@ terraform {
   }
 }
 
-provider "proxmox" {
-    pm_tls_insecure = true
-    pm_api_url = var.proxmox_api_url
-    pm_api_token_id = var.proxmox_username
-    pm_api_token_secret = var.proxmox_token
-    #pm_user = var.proxmox_username
-    #pm_password = var.proxmox_token
-}
-
 resource "proxmox_vm_qemu" "this" {
   target_node = var.proxmox_node
   name = var.hostname
@@ -31,9 +22,8 @@ resource "proxmox_vm_qemu" "this" {
   hotplug = "disk,network,usb"
 
   cpu = "host"
-  cores = "2"
-  memory = "2048"
-  qemu_os = "l26"
+  cores = var.vm_cores
+  memory = var.vm_memory
 
   network {
     model = "virtio"
@@ -45,11 +35,19 @@ resource "proxmox_vm_qemu" "this" {
       virtio0 {
         disk {
           storage = "local-lvm"
-          size    = 10
-          iothread = false
+          size    = "10"
           discard = true
-          backup = true
-          replicate = true
+          backup = var.vm_disks_backup
+          replicate = var.vm_disks_replicate
+        }
+      }
+      virtio1 {
+        disk {
+          storage = "local-lvm"
+          size    = var.vm_disk_size
+          discard = true
+          backup = var.vm_disks_backup
+          replicate = var.vm_disks_replicate
         }
       }
     }

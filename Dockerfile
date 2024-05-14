@@ -14,6 +14,7 @@ RUN \
         ansible \
         ansible-lint \
         ca-certificates \
+        colorized-logs \
         curl \
         genisoimage \
         whois \
