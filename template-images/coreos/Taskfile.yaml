@@ -6,8 +6,6 @@ vars:
   GENERATED_CONFIG_DIR: "{{.STATE_DIR}}/coreos/config"
 env:
   PACKER_PLUGIN_PATH: "{{.STATE_DIR}}/coreos/packer/plugins/"
-  #PACKER_LOG_PATH: "{{.STATE_DIR}}/coreos/packer/packer.log"
-  #PACKER_LOG: 10
 tasks:
   init-state-dir:
     silent: true
@@ -76,6 +74,7 @@ tasks:
           {{.TASKFILE_DIR}}/build/
   build:
     silent: false
+    interactive: true
     desc: "This command builds the ISO on your Proxmox Datastore into a template VM."
     deps:
       - init-state-dir

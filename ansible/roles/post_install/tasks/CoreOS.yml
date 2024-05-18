@@ -1,4 +1,12 @@
 ---
+- name: "Wait for rpm-ostree to finish"
+  shell:
+    cmd: pgrep rpm-ostree
+  register: result
+  until: result.rc == 1
+  retries: 60
+  delay: 5
+
 - name: "Add New Packages"
   community.general.rpm_ostree_pkg:
     name:

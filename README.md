@@ -46,6 +46,12 @@ The SSH key pair is used to connect to the VMs that are deployed to Proxmox. The
 | `ansible/post_install.yml`   | This is a post-install playbook for the various configurations needed once packer has built a VM and has it running. |
 
 
+### Examples
+| Example              | Notes                                                                                                                                                         |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `examples/coreos_vm` | This is an example terraform module that uses the `tfmodules/proxmox-vm` module to deploy a CoreOS VM to Proxmox using one of the generated CoreOS templates. |
+
+
 ## Technologies used
 * [Ansible](https://github.com/ansible/ansible)
 * [CoreOS](https://fedoraproject.org/coreos/)

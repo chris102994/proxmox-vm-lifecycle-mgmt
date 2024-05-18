@@ -95,7 +95,6 @@ build {
     playbook_file = "${var.ansible_dir}/post-install.yml"
     roles_path = "${var.ansible_dir}/roles"
     ssh_authorized_key_file = var.public_key_file
-    ansible_ssh_private_key_file = var.private_key_file
     use_proxy = false
     ansible_env_vars = [
       "ANSIBLE_CONFIG=${var.ansible_dir}/ansible.cfg",
