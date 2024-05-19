@@ -25,8 +25,6 @@ source "proxmox-iso" "this" {
   boot_command = [
     # Start the live ISO
     "<enter>",
-    # Wait for boot
-    "<wait1m>",
     # Mount the CD-ROM containing the ignition config
     "sudo mount /dev/sr1 /mnt/",
     "<enter>",
@@ -38,8 +36,7 @@ source "proxmox-iso" "this" {
     "<wait2m>",
     # Reboot the system
     "reboot",
-    "<enter>",
-    "<wait30s>"
+    "<enter>"
   ]
 
 

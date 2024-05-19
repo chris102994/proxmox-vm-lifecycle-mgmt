@@ -82,7 +82,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Install packages
+        Description=Install packages. Python3 for Ansible and qemu-guest-agent for Proxmox.
         After=network-online.target
         Wants=network-online.target
         ConditionPathExists=!/usr/bin/python3
@@ -92,7 +92,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         ExecStart=/usr/bin/rpm-ostree install -y --apply-live python3 qemu-guest-agent
-        ExecStartPost=/usr/bin/systemctl reboot
+        ExecStartPost=/usr/bin/systemctl restart qemu-guest-agent.service
         
         [Install]
         WantedBy=multi-user.target
@@ -107,8 +107,8 @@ systemd:
         [Service]
         ExecStart=-/usr/bin/qemu-ga
         Restart=always
-        RestartSec=0
-        StartLimitInterval=0
+        #RestartSec=0
+        #StartLimitInterval=0
 
         [Install]
         WantedBy=multi-user.target

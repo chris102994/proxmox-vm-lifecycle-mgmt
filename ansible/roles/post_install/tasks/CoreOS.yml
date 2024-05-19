@@ -1,11 +1,12 @@
 ---
-- name: "Wait for rpm-ostree to finish"
+- name: "Wait for Zincati auto-updater rpm-ostree deploy command to finish"
   shell:
-    cmd: pgrep rpm-ostree
+    cmd: pgrep -f "rpm-ostree deploy"
   register: result
   until: result.rc == 1
   retries: 60
   delay: 5
+  failed_when: result.rc == 0 and result.attempts == 60
 
 - name: "Add New Packages"
   community.general.rpm_ostree_pkg:
@@ -13,7 +14,7 @@
       - parted
     state: present
 
-- name: "Reboot"
+- name: "Reboot to apply changes"
   reboot:
     reboot_timeout: 300
     msg: "Rebooting to apply changes"
