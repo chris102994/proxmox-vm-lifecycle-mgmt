@@ -1,0 +1,3 @@
+---
+role_name: "Install K3s"
+role_description: "Install K3s on a server using k3sup"

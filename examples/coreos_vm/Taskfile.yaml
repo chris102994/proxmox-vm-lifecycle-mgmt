@@ -22,6 +22,28 @@ tasks:
           -upgrade \
           -lock=false
 
+  terraform:refresh:
+    desc: "Refresh the Terraform state."
+    requires:
+      vars:
+        - SSH_PUBLIC_KEY
+        - SSH_PRIVATE_KEY
+        - TASK_STATE_DIR
+        - ANSIBLE_DIR
+    deps:
+        - terraform:init
+    cmds:
+      - |
+        terraform \
+          -chdir={{.TASKFILE_DIR}} \
+        refresh \
+          -compact-warnings \
+          -state={{.TASK_STATE_DIR}}/terraform.tfstate \
+          -var-file={{.TF_VARS_FILE}} \
+          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          -var "ansible_dir={{.ANSIBLE_DIR}}"
+
   terraform:deploy:
     desc: "Deploy a CoreOS instance using Terraform."
     requires:
@@ -40,6 +62,9 @@ tasks:
       - "{{.TASKFILE_DIR}}/**/*"
     generates:
       - "{{.TASK_STATE_DIR}}/terraform.tfstate"
+    env:
+      TF_LOG: "DEBUG"
+      ANSIBLE_CONFIG: "{{.ANSIBLE_DIR}}/ansible.cfg"
     cmds:
       - |
         terraform \
@@ -55,11 +80,14 @@ tasks:
           -chdir={{.TASKFILE_DIR}} \
         apply \
           -auto-approve \
+          -compact-warnings \
           -state={{.TASK_STATE_DIR}}/terraform.tfstate \
           -var-file={{.TF_VARS_FILE}} \
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
           -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
           -var "ansible_dir={{.ANSIBLE_DIR}}"
+
+      
 
   terraform:destroy:
     desc: "Destroy a deployed CoreOS instance using Terraform."
@@ -85,6 +113,7 @@ tasks:
           -chdir={{.TASKFILE_DIR}} \
         destroy \
           -auto-approve \
+          -compact-warnings \
           -state={{.TASK_STATE_DIR}}/terraform.tfstate \
           -var-file={{.TF_VARS_FILE}} \
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \

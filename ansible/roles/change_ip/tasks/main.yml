@@ -1,0 +1,15 @@
+---
+- name: Wait for system to become reachable
+  wait_for_connection:
+      timeout: 120
+
+- name: Gather facts for the first time
+  setup:
+
+- name: "Verify that required variables are defined"
+  include_tasks: "var_check.yaml"
+
+- name: "{{ role_name }}"
+  include_tasks: "CoreOS.yml"
+  when: (ansible_distribution == "Fedora") and
+        (ansible_pkg_mgr == "atomic_container")

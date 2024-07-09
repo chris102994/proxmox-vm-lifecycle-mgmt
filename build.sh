@@ -10,7 +10,7 @@ run() {
     --user "$(id -u):$(id -g)" \
     -p 8080:8080 \
     "${DOCKER_IMAGE_NAME}" \
-    "${@}"
+    ${@}
 }
 
 usage() {

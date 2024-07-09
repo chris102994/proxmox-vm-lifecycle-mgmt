@@ -38,12 +38,13 @@ The SSH key pair is used to connect to the VMs that are deployed to Proxmox. The
 | Role                         | Notes                                                                                                            |
 |------------------------------|------------------------------------------------------------------------------------------------------------------|
 | `ansible/roles/post_install` | This is a post-install role for the various configurations needed once packer has built a VM and has it running. |
-
+| `ansible/roles/change_ip`    | This is a role to change the IP address of a VM.                                                                 |
 
 ### Ansible Playbooks
-| Playbook                     | Notes                                                                                                                |
-|------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `ansible/post_install.yml`   | This is a post-install playbook for the various configurations needed once packer has built a VM and has it running. |
+| Playbook                   | Notes                                                                                                                |
+|----------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `ansible/post_install.yml` | This is a post-install playbook for the various configurations needed once packer has built a VM and has it running. |
+| `ansible/change-ip.yml`    | This is a playbook to change the IP address of a VM.                                                                 |
 
 
 ### Examples

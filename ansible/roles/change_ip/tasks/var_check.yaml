@@ -1,0 +1,15 @@
+---
+- name: "Verify that required variables are defined"
+  assert:
+    that:
+      - this_var is defined
+      - this_var | length > 0
+      - this_var != None
+    fail_msg: "{{ this_var }} needs to be set for the role to work"
+    success_msg: "Required variable {{ this_var }} is defined"
+  loop_control:
+    loop_var: this_var
+  with_items:
+    - new_ip
+    - new_netmask
+    - new_gateway

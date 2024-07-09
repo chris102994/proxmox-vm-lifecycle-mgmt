@@ -1,0 +1,3 @@
+---
+role_name: "Change IP"
+role_description: "Change the IP configuration for packer built images"

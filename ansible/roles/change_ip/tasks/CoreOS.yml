@@ -1,0 +1,56 @@
+---
+- name: "Wait for Zincati auto-updater rpm-ostree deploy command to finish"
+  shell:
+    cmd: pgrep -f "rpm-ostree deploy"
+  register: result
+  until: result.rc == 1
+  retries: 60
+  delay: 5
+  failed_when: result.rc == 0 and result.attempts == 60
+
+- name: "Get the current network config file"
+  register: network_config_files
+  find:
+    paths: /etc/NetworkManager/system-connections/
+    patterns: "*.nmconnection"
+
+- name: "Fail on multiple network configs"
+  fail:
+    msg: "Too many or too few network configs found"
+  when: network_config_files.matched > 1 or network_config_files.matched == 0
+
+- name: "Get the current network config file path"
+  set_fact:
+    network_config_file_path: "{{ network_config_files.files[0].path }}"
+
+- name: "Get the current network connection name"
+  set_fact:
+    network_connection_name: "{{ network_config_file_path | basename | regex_replace('(.*)\\.nmconnection', '\\1') }}"
+
+- name: "debug network_connection_name"
+  debug:
+    var: network_connection_name
+
+- name: "Update the network connection with nmcli"
+  register: network_connection
+  community.general.nmcli:
+    conn_name: "{{ network_connection_name }}"
+    gw4: "{{ new_gateway }}"
+    ip4: "{{ new_ip }}/{{ new_netmask }}"
+    state: present
+    type: ethernet
+  register: nmcli_con_name
+
+- name: "Restart the network services"
+  systemd:
+      name: NetworkManager
+      state: restarted
+
+- name: Refresh inventory to ensure new instances exist in inventory
+  ansible.builtin.meta: refresh_inventory
+
+- name: Wait for system to become reachable
+  wait_for_connection:
+      timeout: 120
+
+

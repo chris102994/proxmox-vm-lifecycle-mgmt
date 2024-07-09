@@ -1,0 +1,4 @@
+---
+- name: Create an inventory from state file in provided directory
+  plugin: cloud.terraform.terraform_provider
+  project_path: "../state/coreos/examples/coreos_vm/terraform/"

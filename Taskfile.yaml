@@ -6,6 +6,7 @@ env:
   SSH_KEY_DIR: "{{.STATE_DIR}}/ssh"
   SSH_PRIVATE_KEY: "{{.SSH_KEY_DIR}}/id_rsa"
   SSH_PUBLIC_KEY: "{{.SSH_PRIVATE_KEY}}.pub"
+  FORCE_COLOR: "true"
 
 includes:
   images:
