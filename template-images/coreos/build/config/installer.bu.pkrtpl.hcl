@@ -17,23 +17,23 @@ storage:
   disks:
     # The link to the block device the OS was booted from
     - device: /dev/disk/by-id/coreos-boot-disk
-      # We do NOT want to wipe the partition table since this is the primary device.
       wipe_table: false
       partitions:
         - number: 4
           label: root
-          # Allocate at least 8GB to the rootfs
           size_mib: 8192
           resize: true
-        - size_mib: 0
-          # Assign a descriptive label to the partition. This is important
-          # For referencing to it in a device-agnostic way in other parts of the configuration.
+    - device: /dev/vdb
+      wipe_table: false
+      partitions:
+        - number: 1
           label: var
+          size_mib: 8192
+          resize: true
   filesystems:
     - path: /var
       device: /dev/disk/by-partlabel/var
       format: xfs
-      # Ask butane to generate a mount unit for us so that this FS gets mounted in real boot
       with_mount_unit: true
   files:
     - path: /etc/hostname

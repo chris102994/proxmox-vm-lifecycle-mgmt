@@ -1,0 +1,22 @@
+---
+- name: "Read Device Information /dev/sda"
+  parted:
+    device: "{{ partition_devices.COREOS }}"
+    unit: "MiB"
+    state: "info"
+  register: device_info
+
+- name: "Extrapolate Partition Information from Device Information"
+  set_fact:
+    partition_number: "{{ device_info.partitions | length | int }}"
+
+- name: "Expand filesystem {{ partition_devices.COREOS }}{{ partition_number }} to 100%"
+  community.general.filesystem:
+    fstype: "xfs"
+    dev: "{{ partition_devices.COREOS }}{{ partition_number }}"
+    resizefs: true
+    state: present
+  register: new_filesystem_info
+
+- name: "Expand partition {{ partition_devices.COREOS }}{{ partition_number }} to 100%"
+  command: "growpart {{ partition_devices.COREOS }} {{ partition_number }}"

@@ -68,6 +68,12 @@ source "proxmox-iso" "this" {
     type = "virtio"
   }
 
+  disks {
+    disk_size = "10G"
+    storage_pool = "local-lvm"
+    type = "virtio"
+  }
+
   iso_file = var.iso_file
   unmount_iso = true
   template_name = var.template_name

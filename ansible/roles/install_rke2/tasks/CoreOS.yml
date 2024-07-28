@@ -1,0 +1,30 @@
+---
+- name: "Wait for Zincati auto-updater rpm-ostree deploy command to finish"
+  shell:
+    cmd: pgrep -f "rpm-ostree deploy"
+  register: result
+  until: result.rc == 1
+  retries: 60
+  delay: 5
+  failed_when: result.rc == 0 and result.attempts == 60
+
+- name: "Download RKE2 install script"
+  get_url:
+    url: "https://get.rke2.io"
+    dest: "/tmp/install_rke2.sh"
+    mode: "0755"
+
+- name: "Install RKE2"
+  command: "/tmp/install_rke2.sh"
+
+- name: "Enable RKE2 service"
+  systemd:
+    name: "rke2-server"
+    enabled: true
+    no_block: true
+
+- name: "Start RKE2 service"
+  systemd:
+    name: "rke2-server"
+    state: started
+    no_block: true

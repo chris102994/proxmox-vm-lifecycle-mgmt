@@ -17,6 +17,7 @@ RUN \
         colorized-logs \
         curl \
         genisoimage \
+        jq \
         whois \
         xorriso && \
     sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /bin && \

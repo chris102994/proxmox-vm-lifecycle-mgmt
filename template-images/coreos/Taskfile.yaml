@@ -100,7 +100,7 @@ tasks:
       - task: generate-ignition-config
       - |
           packer build \
-            --on-error=ask \
+            --on-error=cleanup  \
             -except="*IgnitionBuilder*" \
             -var-file={{.PACKER_VARS_FILE}} \
             -var "tpl_config_dir={{.TEMPLATE_CONFIG_DIR}}" \

@@ -68,6 +68,17 @@ resource "ansible_host" "proxmox_vm" {
   }
 }
 
+resource "ansible_playbook" "expand_fs_playbook" {
+  name = ansible_host.proxmox_vm.name
+  groups = [ansible_group.nodes.name]
+  playbook = "${var.ansible_dir}/expand-fs.yml"
+  extra_vars = {
+    ansible_ssh_user = var.default_user
+    ansible_ssh_private_key_file = var.private_key_file
+  }
+}
+
+
 # TODO: wait for https://github.com/ansible/terraform-provider-ansible/pull/109
 # For some reason the group/host vars aren't being inherited when using the ansible_playbook resource
 resource "ansible_playbook" "change_ip_playbook" {
@@ -81,6 +92,16 @@ resource "ansible_playbook" "change_ip_playbook" {
     new_ip = var.ip_address
     new_netmask = var.netmask
     new_gateway = var.gateway
+  }
+}
+
+resource "ansible_playbook" "install_rke2_playbook" {
+  name = ansible_host.proxmox_vm.name
+  groups = [ansible_group.nodes.name]
+  playbook = "${var.ansible_dir}/install-rke2.yml"
+  extra_vars = {
+    ansible_ssh_user = var.default_user
+    ansible_ssh_private_key_file = var.private_key_file
   }
 }
 

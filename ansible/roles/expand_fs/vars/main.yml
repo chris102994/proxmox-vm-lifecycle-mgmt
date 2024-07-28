@@ -1,0 +1,9 @@
+---
+role_name: "Expand Filesystem"
+role_description: "Tasks to expand the filesystem to 100%"
+
+partition_labels:
+    COREOS: "var"
+
+partition_devices:
+    COREOS: "/dev/vdb"

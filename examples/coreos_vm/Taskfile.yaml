@@ -119,3 +119,32 @@ tasks:
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
           -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
           -var "ansible_dir={{.ANSIBLE_DIR}}"
+
+  ssh:
+    desc: "SSH into a CoreOS instance."
+    interactive: true
+    requires:
+      vars:
+        - TASK_STATE_DIR
+        - SSH_PRIVATE_KEY
+    deps:
+      - terraform:refresh
+    vars:
+      VM_IP:
+        sh: |
+            terraform \
+                -chdir={{.TASKFILE_DIR}} \
+            output \
+                -state={{.TASK_STATE_DIR}}/terraform.tfstate \
+                -json \
+                | jq -r '.vm_ip.value'
+      VM_UN:
+        sh: |
+            terraform \
+                -chdir={{.TASKFILE_DIR}} \
+            output \
+                -state={{.TASK_STATE_DIR}}/terraform.tfstate \
+                -json \
+                | jq -r '.vm_user.value'
+    cmds:
+      - ssh -i {{.SSH_PRIVATE_KEY}} -tt -o StrictHostKeyChecking=no {{.VM_UN}}@{{.VM_IP}}

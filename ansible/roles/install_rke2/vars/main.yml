@@ -1,0 +1,3 @@
+---
+role_name: "Install RKE2"
+role_description: "Install RKE2 server on a VM"

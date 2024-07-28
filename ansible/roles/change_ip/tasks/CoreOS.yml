@@ -40,11 +40,7 @@
     state: present
     type: ethernet
   register: nmcli_con_name
-
-- name: "Restart the network services"
-  systemd:
-      name: NetworkManager
-      state: restarted
+  notify: "Restart NetworkManager"
 
 - name: Refresh inventory to ensure new instances exist in inventory
   ansible.builtin.meta: refresh_inventory

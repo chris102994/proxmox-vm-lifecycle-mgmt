@@ -1,4 +1,11 @@
 ---
+- name: Wait for system to become reachable
+  wait_for_connection:
+      timeout: 120
+
+- name: Gather facts for the first time
+  setup:
+
 - name: "{{ role_name }}"
   include_tasks: "CoreOS.yml"
   when: (ansible_distribution == "Fedora") and

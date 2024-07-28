@@ -1,0 +1,8 @@
+---
+- become: true
+  become_method: sudo
+  debugger: never
+  gather_facts: false
+  hosts: all
+  roles:
+    - role: install_rke2
