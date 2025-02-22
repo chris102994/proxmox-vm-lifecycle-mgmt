@@ -1,0 +1,5 @@
+---
+- name: "{{ role_name }}"
+  include_tasks: "Debian.yml"
+  when: (ansible_distribution == "Debian") and
+        (ansible_pkg_mgr == "apt")

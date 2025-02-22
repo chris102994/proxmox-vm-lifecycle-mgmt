@@ -1,8 +1,9 @@
 version: '3'
 
 vars:
-  TASK_STATE_NAME: "coreos"
+  TASK_STATE_NAME: "talos"
   TASK_STATE_DIR: "{{.STATE_DIR}}/{{.TASK_STATE_NAME}}/examples/{{.TASK_STATE_NAME}}_vm/terraform"
+  TASK_CONFIG_DIR: "{{.STATE_DIR}}/{{.TASK_STATE_NAME}}/examples/{{.TASK_STATE_NAME}}_vm/config"
   TF_VARS_FILE: "{{.STATE_DIR}}/{{.TASK_STATE_NAME}}/variables.pkrvars.hcl"
 
 tasks:
@@ -12,10 +13,12 @@ tasks:
     requires:
       vars:
         - TASK_STATE_DIR
+        - TASK_CONFIG_DIR
     sources:
       - "{{.TASKFILE_DIR}}/**/*"
     cmds:
       - "mkdir -p {{.TASK_STATE_DIR}}"
+      - "mkdir -p {{.TASK_CONFIG_DIR}}"
       - |
         terraform \
           -chdir={{.TASKFILE_DIR}} \
@@ -30,7 +33,7 @@ tasks:
         - SSH_PUBLIC_KEY
         - SSH_PRIVATE_KEY
         - TASK_STATE_DIR
-        - ANSIBLE_DIR
+        - TASK_CONFIG_DIR
     deps:
         - terraform:init
     cmds:
@@ -43,8 +46,8 @@ tasks:
           -var-file={{.TF_VARS_FILE}} \
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
           -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
-          -var "ansible_dir={{.ANSIBLE_DIR}}" \
-          -var "state_dir={{.TASK_STATE_DIR}}"
+          -var "state_dir={{.TASK_STATE_DIR}}" \
+          -var "config_dir={{.TASK_CONFIG_DIR}}"
 
   terraform:deploy:
     desc: "Deploy a {{.TASK_STATE_NAME}} instance using Terraform."
@@ -53,20 +56,17 @@ tasks:
         - SSH_PUBLIC_KEY
         - SSH_PRIVATE_KEY
         - TASK_STATE_DIR
-        - ANSIBLE_DIR
+        - TASK_CONFIG_DIR
     deps:
         - terraform:init
     sources:
       - "{{.TF_VARS_FILE}}"
       - "{{.SSH_PRIVATE_KEY}}"
       - "{{.SSH_PUBLIC_KEY}}"
-      - "{{.ANSIBLE_DIR}}/**/*"
       - "{{.TASKFILE_DIR}}/**/*"
     generates:
       - "{{.TASK_STATE_DIR}}/terraform.tfstate"
-    env:
-      TF_LOG: "DEBUG"
-      ANSIBLE_CONFIG: "{{.ANSIBLE_DIR}}/ansible.cfg"
+      - "{{.TASK_CONFIG_DIR}}/*.yaml"
     cmds:
       - |
         terraform \
@@ -76,8 +76,8 @@ tasks:
           -var-file={{.TF_VARS_FILE}} \
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
           -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
-          -var "ansible_dir={{.ANSIBLE_DIR}}" \
-          -var "state_dir={{.TASK_STATE_DIR}}"
+          -var "state_dir={{.TASK_STATE_DIR}}" \
+          -var "config_dir={{.TASK_CONFIG_DIR}}"
       - |
         terraform \
           -chdir={{.TASKFILE_DIR}} \
@@ -88,8 +88,8 @@ tasks:
           -var-file={{.TF_VARS_FILE}} \
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
           -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
-          -var "ansible_dir={{.ANSIBLE_DIR}}" \
-          -var "state_dir={{.TASK_STATE_DIR}}"
+          -var "state_dir={{.TASK_STATE_DIR}}" \
+          -var "config_dir={{.TASK_CONFIG_DIR}}"
 
       
 
@@ -100,14 +100,13 @@ tasks:
         - SSH_PUBLIC_KEY
         - SSH_PRIVATE_KEY
         - TASK_STATE_DIR
-        - ANSIBLE_DIR
+        - TASK_CONFIG_DIR
     deps:
       - terraform:init
     sources:
       - "{{.TF_VARS_FILE}}"
       - "{{.SSH_PRIVATE_KEY}}"
       - "{{.SSH_PUBLIC_KEY}}"
-      - "{{.ANSIBLE_DIR}}/**/*"
       - "{{.TASKFILE_DIR}}/**/*"
     generates:
       - "{{.TASK_STATE_DIR}}/terraform.tfstate"
@@ -122,34 +121,5 @@ tasks:
           -var-file={{.TF_VARS_FILE}} \
           -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
           -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
-          -var "ansible_dir={{.ANSIBLE_DIR}}" \
-          -var "state_dir={{.TASK_STATE_DIR}}"
-
-  ssh:
-    desc: "SSH into a {{.TASK_STATE_NAME}} instance."
-    interactive: true
-    requires:
-      vars:
-        - TASK_STATE_DIR
-        - SSH_PRIVATE_KEY
-    deps:
-      - terraform:refresh
-    vars:
-      VM_IP:
-        sh: |
-            terraform \
-                -chdir={{.TASKFILE_DIR}} \
-            output \
-                -state={{.TASK_STATE_DIR}}/terraform.tfstate \
-                -json \
-                | jq -r '.vm_ip.value'
-      VM_UN:
-        sh: |
-            terraform \
-                -chdir={{.TASKFILE_DIR}} \
-            output \
-                -state={{.TASK_STATE_DIR}}/terraform.tfstate \
-                -json \
-                | jq -r '.vm_user.value'
-    cmds:
-      - ssh -i {{.SSH_PRIVATE_KEY}} -tt -o StrictHostKeyChecking=no {{.VM_UN}}@{{.VM_IP}}
+          -var "state_dir={{.TASK_STATE_DIR}}" \
+          -var "config_dir={{.TASK_CONFIG_DIR}}"

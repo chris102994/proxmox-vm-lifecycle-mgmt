@@ -12,8 +12,8 @@ includes:
   images:
     taskfile: ./template-images/Taskfile.yaml
   ansible:
-    internal: true # This will be true until the pathlib bug is fixed for ansible-lint
     taskfile: ./ansible/Taskfile.yaml
+    dir: "./ansible"
   examples:
     taskfile: ./examples/Taskfile.yaml
 tasks:

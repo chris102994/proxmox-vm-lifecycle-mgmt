@@ -28,3 +28,10 @@
     name: "rke2-server"
     state: started
     no_block: true
+
+- name: "Copy the RKE2 kubeconfig to the local state folder"
+  fetch:
+    src: "/etc/rancher/rke2/rke2.yaml"
+    dest: "{{ state_dir }}/kubeconfig.yaml"
+    flat: true
+    fail_on_missing: true

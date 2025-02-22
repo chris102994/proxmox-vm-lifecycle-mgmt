@@ -1,7 +1,69 @@
+---
 version: '3'
 
+vars:
+  TASK_STATE_NAME: "ansible"
+  TASK_CONFIG_DIR: "{{.STATE_DIR}}/{{.TASK_STATE_NAME}}/config"
+
 tasks:
+  init:
+    internal: true
+    desc: "Initialize the ansible task {{.TASK_STATE_NAME}} module."
+    requires:
+      vars:
+        - TASK_STATE_DIR
+        - TASK_CONFIG_DIR
+        - SSH_PRIVATE_KEY
+        - SSH_PUBLIC_KEY
+    sources:
+      - "{{.TASKFILE_DIR}}/**/*"
+    preconditions:
+      - sh: ansible --version
+        msg: "Ansible must be installed"
+      - sh: ansible-playbook --version
+        msg: "Ansible Playbook must be installed"
+      - sh: "test -f {{.ANSIBLE_INVENTORY_FILE}}"
+        msg: "Ansible inventory file {{.ANSIBLE_INVENTORY_FILE}} must exist"
+    cmds:
+      - "mkdir -p {{.TASK_CONFIG_DIR}}"
+
   lint:
+    internal: true # This will be true until the pathlib bug is fixed for ansible-lint
     desc: "Run the linter on the Ansible playbooks."
+    deps:
+      - init
     cmds:
       - "ansible-lint ."
+
+  add:ssh-key:proxmox:
+    desc: "Add your generated SSH key to Proxmox Hosts"
+    interactive: true
+    vars:
+      ANSIBLE_INVENTORY_FILE: "{{.TASK_CONFIG_DIR}}/inventory.ini"
+    env:
+      ANSIBLE_CONFIG: "{{.TASK_CONFIG_DIR}}/ansible.cfg"
+    deps:
+      - init
+    cmds:
+      - |
+        ansible-playbook \
+          --inventory "{{.ANSIBLE_INVENTORY_FILE}}" \
+          -e "public_ssh_key_file={{.SSH_PUBLIC_KEY}}" \
+          --user root \
+          --ask-pass \
+        ./proxmox-add-ssh-key.yml
+
+  update:proxmox:
+    desc: "Update the proxmox hosts using Ansible."
+    vars:
+      ANSIBLE_INVENTORY_FILE: "{{.TASK_CONFIG_DIR}}/inventory.ini"
+    env:
+      ANSIBLE_CONFIG: "{{.TASK_CONFIG_DIR}}/ansible.cfg"
+      ANSIBLE_PRIVATE_KEY_FILE: "{{.SSH_PRIVATE_KEY}}"
+    deps:
+      - init
+    cmds:
+      - |
+        ansible-playbook \
+          --inventory "{{.ANSIBLE_INVENTORY_FILE}}" \
+        ./proxmox-update-host.yml

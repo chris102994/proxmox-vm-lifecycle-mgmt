@@ -3,3 +3,5 @@ version: '3'
 includes:
   coreos:
     taskfile: ./coreos/Taskfile.yaml
+  talos:
+    taskfile: ./talos/Taskfile.yaml

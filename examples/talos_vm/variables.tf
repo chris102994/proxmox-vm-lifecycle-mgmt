@@ -14,12 +14,6 @@ variable "proxmox_api_url" {
 }
 
 #####
-
-variable "ansible_dir" {
-  type = string
-  description = "The path to the directory where the ansible assets are"
-}
-
 variable "private_key_file" {
     type = string
     description = "The path to the private key file"
@@ -28,6 +22,11 @@ variable "private_key_file" {
 variable "public_key_file" {
     type = string
     description = "The path to the public key file"
+}
+
+variable "iso_file" {
+  description = "The path to the ISO file (on proxmox_node)"
+  type        = string
 }
 
 variable "template_name" {
@@ -115,4 +114,9 @@ variable "vm_disks_replicate" {
 variable "state_dir" {
     type = string
     description = "The path to the directory where the state files are stored"
+}
+
+variable "config_dir" {
+    type = string
+    description = "The path to the directory where the generated config files are stored"
 }

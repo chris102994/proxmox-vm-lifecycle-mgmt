@@ -102,6 +102,8 @@ resource "ansible_playbook" "install_rke2_playbook" {
   extra_vars = {
     ansible_ssh_user = var.default_user
     ansible_ssh_private_key_file = var.private_key_file
+
+    state_dir = var.state_dir
   }
 }
 

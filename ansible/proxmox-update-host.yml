@@ -1,0 +1,8 @@
+---
+- become: true
+  become_method: sudo
+  debugger: never
+  gather_facts: true
+  hosts: proxmox_hosts
+  roles:
+    - role: update_host

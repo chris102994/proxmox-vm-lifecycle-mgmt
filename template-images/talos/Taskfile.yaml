@@ -1,0 +1,113 @@
+version: '3'
+
+vars:
+  PACKER_VARS_FILE: "{{.STATE_DIR}}/talos/variables.pkrvars.hcl"
+  TEMPLATE_CONFIG_DIR: "{{.TASKFILE_DIR}}/build/config"
+  GENERATED_CONFIG_DIR: "{{.STATE_DIR}}/talos/config"
+env:
+  PACKER_PLUGIN_PATH: "{{.STATE_DIR}}/talos/packer/plugins/"
+tasks:
+  init-state-dir:
+    silent: true
+    internal: true
+    desc: "This command initializes the state directory for the Talos VM."
+    requires:
+      vars:
+          - STATE_DIR
+          - GENERATED_CONFIG_DIR
+    cmds:
+      - "mkdir -p {{.STATE_DIR}}/talos/packer"
+      - "mkdir -p {{.GENERATED_CONFIG_DIR}}"
+      - "touch {{.STATE_DIR}}/talos/packer/packer.log"
+  packer-init:
+    silent: false
+    internal: true
+    desc: "This command initializes the Packer build directory and installs the required plugins."
+    requires:
+      vars:
+          - TASKFILE_DIR
+          - STATE_DIR
+    cmds:
+      - "packer init {{.TASKFILE_DIR}}/build/"
+    generates:
+      - "{{.STATE_DIR}}/talos/packer/plugins/*"
+  #generate-ignition-config:
+  #  silent: false
+  #  internal: true
+  #  desc: "This command generates the Ignition Config for the Talos VM."
+  #  interactive: true
+  #  deps:
+  #    - init-state-dir
+  #  requires:
+  #    vars:
+  #      - PACKER_VARS_FILE
+  #      - TASKFILE_DIR
+  #      - TEMPLATE_CONFIG_DIR
+  #      - GENERATED_CONFIG_DIR
+  #      - ANSIBLE_DIR
+  #      - SSH_PRIVATE_KEY
+  #      - SSH_PUBLIC_KEY
+  #  preconditions:
+  #    - sh: "test -f {{.PACKER_VARS_FILE}}"
+  #      msg: "Packer Vars File {{.PACKER_VARS_FILE}} doesn't exist."
+  #  sources:
+  #    - "{{.TEMPLATE_CONFIG_DIR}}/installer.bu.pkrtpl.hcl"
+  #    - "{{.TASKFILE_DIR}}/build/IgnitionBuilder.pkr.hcl"
+  #    - "{{.SSH_PRIVATE_KEY}}"
+  #    - "{{.SSH_PUBLIC_KEY}}"
+  #    - "{{.TEMPLATE_CONFIG_DIR}}"
+  #  generates:
+  #    - "{{.GENERATED_CONFIG_DIR}}/installer.bu"
+  #    - "{{.GENERATED_CONFIG_DIR}}/installer.ign"
+  #    - "{{.GENERATED_CONFIG_DIR}}/password.txt"
+  #  cmds:
+  #    - |
+  #        packer build \
+  #          --on-error=cleanup \
+  #          -only="*IgnitionBuilder*" \
+  #          -var-file={{.PACKER_VARS_FILE}} \
+  #          -var "tpl_config_dir={{.TEMPLATE_CONFIG_DIR}}" \
+  #          -var "gen_config_dir={{.GENERATED_CONFIG_DIR}}" \
+  #          -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+  #          -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+  #          -var "ansible_dir={{.ANSIBLE_DIR}}" \
+  #        {{.TASKFILE_DIR}}/build/
+  build:
+    silent: false
+    interactive: true
+    desc: "This command builds the ISO on your Proxmox Datastore into a template VM."
+    deps:
+      - init-state-dir
+    preconditions:
+      - sh: "test -f {{.PACKER_VARS_FILE}}"
+        msg: "Packer Vars File {{.PACKER_VARS_FILE}} doesn't exist."
+    requires:
+      vars:
+        - PACKER_VARS_FILE
+        - TASKFILE_DIR
+        - TEMPLATE_CONFIG_DIR
+        - GENERATED_CONFIG_DIR
+        - SSH_PRIVATE_KEY
+        - SSH_PUBLIC_KEY
+    sources:
+        - "{{.TASKFILE_DIR}}/build/talos.pkr.hcl"
+        - "{{.GENERATED_CONFIG_DIR}}/installer.ign"
+        - "{{.GENERATED_CONFIG_DIR}}/password.txt"
+        - "{{.SSH_PRIVATE_KEY}}"
+        - "{{.SSH_PUBLIC_KEY}}"
+    cmds:
+      - task: packer-init
+    #  - task: generate-ignition-config
+    #  -except="*IgnitionBuilder*" \
+    #  -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+    #  -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+    #  -var "ansible_dir={{.ANSIBLE_DIR}}" \
+    # -var "tpl_config_dir={{.TEMPLATE_CONFIG_DIR}}" \
+    # -var "gen_config_dir={{.GENERATED_CONFIG_DIR}}" \
+      - |
+          packer build \
+            --on-error=cleanup  \
+            -var-file={{.PACKER_VARS_FILE}} \
+            -var "private_key_file={{.SSH_PRIVATE_KEY}}" \
+            -var "public_key_file={{.SSH_PUBLIC_KEY}}" \
+          {{.TASKFILE_DIR}}/build/

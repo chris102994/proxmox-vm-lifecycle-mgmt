@@ -1,12 +1,12 @@
-FROM hashicorp/packer:light as PACKER
-FROM hashicorp/terraform:1.8.1 as TERRAFORM
-FROM quay.io/coreos/butane:release as BUTANE
+FROM hashicorp/packer:light AS packer
+FROM hashicorp/terraform:1.8.1 AS terraform
+FROM quay.io/coreos/butane:release AS butane
 
 FROM ubuntu:noble
 
-COPY --from=PACKER    /bin/packer           /bin/packer
-COPY --from=TERRAFORM /bin/terraform        /bin/terraform
-COPY --from=BUTANE    /usr/local/bin/butane /bin/butane
+COPY --from=packer    /bin/packer           /bin/packer
+COPY --from=terraform /bin/terraform        /bin/terraform
+COPY --from=butane    /usr/local/bin/butane /bin/butane
 
 RUN \
     apt-get update && \
@@ -21,6 +21,7 @@ RUN \
         whois \
         xorriso && \
     sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /bin && \
+    curl -sL https://talos.dev/install | sh && \
     mkdir -p /work && \
     apt-get clean
 
